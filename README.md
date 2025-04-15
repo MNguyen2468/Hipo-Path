@@ -3,7 +3,7 @@ This program only works on Linux.
 
 # Setup
 1. Download ALL the files and folders.
-2. Setup Anaconda if you havent already (bash Anaconda3-2024.10-1-Linux-x86_64.sh)
+2. Setup Anaconda (Linux) if you havent already
 3. Create the environment (conda env create -f linux_model.yaml)
 4. If you have anaconda3 already installed at your home directory, you can skip this step. Otherwise, edit linux_tcgajob.sh and change "source" to where anaconda3 is.
 
