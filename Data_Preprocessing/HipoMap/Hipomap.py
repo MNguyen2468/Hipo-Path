@@ -194,9 +194,9 @@ def extractingPatches(inputsvs, outputpath, magnification, patch_extraction_crea
                     intermediate_output,y_pred2 = intermediate_layer_model.predict(patchs1)
 #                     y_pred2[0][0] = max(y_pred2[0][0] - 0.07,0)
                     al_h =  HipoScore(intermediate_output,y_pred[0][0])
-                    al_h1 = HipoScore1(intermediate_output,y_pred[0][0])
+                    #al_h1 = HipoScore1(intermediate_output,y_pred[0][0])
                     ALL_P.append(al_h)
-                    ALL_P2.append(al_h1)
+                    #ALL_P2.append(al_h1)
 #                     /y_pred = y_pred
                     ALL_P3.append((y_pred[0][0],j,i))
                     print(y_pred[0][0])
@@ -211,7 +211,7 @@ def extractingPatches(inputsvs, outputpath, magnification, patch_extraction_crea
                     # print(sample_img1.shape)
 #                     print(a)
     print("finished slide: Saving now...")
-    return ALL_P1,ALL_P,ALL_P3,ALL_P2
+    return ALL_P1,ALL_P,ALL_P3#,ALL_P2
 
 
 # In[ ]:
@@ -221,10 +221,16 @@ from PIL import Image as im
 import csv
 path_mod = f'./Slides{slide_number}/'
 os.makedirs(path_mod, exist_ok=True)
-list_mod = os.listdir(path_mod)
+list_mod = []
+for root, dirs, files in os.walk(path_mod):
+    for file in files:
+        if file.endswith('svs'):
+            list_mod.append(os.path.join(root, file))
+
+#os.listdir(path_mod)
 
 
-list_slide = []
+
 # Assuming list_mod contains filenames (strings)
 # And you have another directory to compare against:
 other_dir = "./HipoScores_t"
@@ -235,9 +241,14 @@ other_filenames = os.listdir(other_dir)
 other_prefixes = {fname[:23] for fname in other_filenames}
 
 # Now filter your list_mod
-for i in list_mod:
-    if i.endswith('svs') and i[:23] not in other_prefixes:
-        list_slide.append(i)
+list_slide = []
+for file in list_mod:
+    prefix = os.path.basename(file)[:23]  
+    if prefix not in other_prefixes:
+        list_slide.append(file)
+    #if i.endswith('svs') and i[:23] not in other_prefixes:
+        
+        #list_slide.append(i)
 # for i in list_mod:
 #     if i[-3:] == 'svs':
 #         list_slide.append(i)
@@ -252,35 +263,35 @@ for i in list_slide[:]:
     tmp_count = {}
     tmp_heatmap = {}
     print(i)
-    data = path_mod + i
+    data = i #path_mod + i
     print(data)
 #     model = load_model('newmodel13new.h5',custom_objects={'Attention': Attention})
     slide = OpenSlide(data)
     slide_dimensions = slide.level_dimensions
     if len(slide_dimensions) == 3:
-        ALL_P1,ALL_P,ALL_P3,ALL_P2= extractingPatches(data,"temp",magnification = "20x",patch_size= (256,256),Annotation = None,Annotatedlevel = 0, Requiredlevel = 0,Requiredlevel1 = 1,model=model)
+        ALL_P1,ALL_P,ALL_P3 = extractingPatches(data,"temp",magnification = "20x",patch_size= (256,256),Annotation = None,Annotatedlevel = 0, Requiredlevel = 0,Requiredlevel1 = 1,model=model)
     else:
-        ALL_P1,ALL_P,ALL_P3,ALL_P2 = extractingPatches(data,"temp",magnification = "20x",patch_size= (256,256),Annotation = None,  Annotatedlevel = 0, Requiredlevel = 1,Requiredlevel1 = 2,model=model)
+        ALL_P1,ALL_P,ALL_P3 = extractingPatches(data,"temp",magnification = "20x",patch_size= (256,256),Annotation = None,  Annotatedlevel = 0, Requiredlevel = 1,Requiredlevel1 = 2,model=model)
 
     scores_path = './scores_t'
     os.makedirs(scores_path, exist_ok=True)
-    gradcam_20_path1 = os.path.join(scores_path, i[:-4] + "new")
+    gradcam_20_path1 = os.path.join(scores_path, os.path.basename(i)[:-4] + "new")
     np.save(gradcam_20_path1, ALL_P1)
 
     hipo_scores_path = './HipoScores_t'
     os.makedirs(hipo_scores_path, exist_ok=True)
-    gradcam_20_path2 = os.path.join(hipo_scores_path,  i[:-4] + "new")
+    gradcam_20_path2 = os.path.join(hipo_scores_path,  os.path.basename(i)[:-4] + "new")
     np.save(gradcam_20_path2, ALL_P)
 
     grad_prob_path = './Grad_prob_t'
     os.makedirs(grad_prob_path, exist_ok=True)
-    gradcam_20_path3 = os.path.join(grad_prob_path,  i[:-4] + "new")
+    gradcam_20_path3 = os.path.join(grad_prob_path,  os.path.basename(i)[:-4] + "new")
     np.save(gradcam_20_path3, ALL_P3)
 
-    hipo_scores_t_update_path = './HipoScores_t_update'
-    os.makedirs(hipo_scores_t_update_path, exist_ok=True)
-    gradcam_20_path4 = os.path.join(hipo_scores_t_update_path,  i[:-4] + "new")
-    np.save(gradcam_20_path4, ALL_P2)
+    #hipo_scores_t_update_path = './HipoScores_t_update'
+    #os.makedirs(hipo_scores_t_update_path, exist_ok=True)
+    #gradcam_20_path4 = os.path.join(hipo_scores_t_update_path,  i[:-4] + "new")
+    #np.save(gradcam_20_path4, ALL_P2)
 
     # gradcam_20_path1 = '/home/kosaraju//ALK/New_data_results/Additional_data///////scores/' + '1028201' + "new"
     # gradcam_20_path2 = '/home/kosaraju//ALK/New_data_results/Additional_data//////HipoScores/' + '1028201' + "new"
